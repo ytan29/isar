@@ -1,6 +1,8 @@
 # This software is a part of ISAR.
 # Copyright (C) 2015-2017 ilbers GmbH
 
+inherit base-apt-helper
+
 IMAGE_INSTALL ?= ""
 IMAGE_TYPE    ?= "ext4-img"
 IMAGE_ROOTFS   = "${WORKDIR}/rootfs"
@@ -111,3 +113,22 @@ do_populate_sdk[stamp-extra-info] = "${MACHINE}-${DISTRO}"
 do_populate_sdk[depends] = "sdkchroot:do_build"
 
 addtask populate_sdk after do_rootfs
+
+do_repro_build[depends] = "base-apt:do_cache_config"
+do_repro_build[stamp-extra-info] = "${MACHINE}-${DISTRO}"
+
+do_repro_build() {
+    if [ -d ${WORKDIR}/apt_cache ]; then
+        populate_base_apt ${WORKDIR}/apt_cache
+    fi
+
+    if [ -d ${BUILDCHROOT_HOST_DIR}/var/cache/apt ]; then
+        populate_base_apt ${BUILDCHROOT_HOST_DIR}/var/cache/apt
+    fi
+
+    if [ -d ${BUILDCHROOT_TARGET_DIR}/var/cache/apt ]; then
+        populate_base_apt ${BUILDCHROOT_TARGET_DIR}/var/cache/apt
+    fi
+}
+
+addtask repro_build after do_rootfs
