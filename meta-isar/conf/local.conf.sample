@@ -165,3 +165,7 @@ IMAGE_INSTALL = "example-hello example-raw example-module"
 # Enable cross-compilation support
 # NOTE: this works only for stretch-armhf and stretch-amd64 targets for now.
 ISAR_CROSS_COMPILE ?= "0"
+
+#
+# Uncomment this to enable build reproducibility
+#ISAR_REPRO ?= "1"
