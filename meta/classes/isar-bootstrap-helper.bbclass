@@ -98,6 +98,11 @@ setup_root_file_system() {
     else
         sudo mount --bind ${DEPLOY_DIR_APT}/${ROOTFS_DISTRO} $ROOTFSDIR/isar-apt
     fi
+
+    if [ "${ISAR_REPRO}" = "1" ]; then
+        sudo mount --bind ${BASE_APT_DIR} ${ROOTFSDIR}/base-apt
+    fi
+
     sudo mount -t devtmpfs -o mode=0755,nosuid devtmpfs $ROOTFSDIR/dev
     sudo mount -t proc none $ROOTFSDIR/proc
 
