@@ -57,7 +57,7 @@ IMAGE_ACCOUNTS_USERS =+ "${@gen_accounts_array(d, 'USERS', 'USER', ['password', 
 # groupname:groupid:flag1,flag2
 IMAGE_ACCOUNTS_GROUPS =+ "${@gen_accounts_array(d, 'GROUPS', 'GROUP', ['gid', 'flags'])}"
 
-ROOTFS_CONFIGURE_COMMAND += "image_configure_accounts"
+ROOTFS_POSTPROCESS_COMMAND += "image_configure_accounts"
 image_configure_accounts[weight] = "3"
 image_configure_accounts() {
     # Create groups
