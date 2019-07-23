@@ -17,6 +17,7 @@ USERS ??= ""
 #USER_root[home] = "/home/root"
 #USER_root[shell] = "/bin/sh"
 #USER_root[groups] = "audio video"
+#USER_root[skel] = ""
 #USER_root[flags] = "no-create-home create-home system allow-empty-password"
 
 GROUPS ??= ""
@@ -49,8 +50,8 @@ def gen_accounts_array(d, listname, entryname, flags, verb_flags=None):
     )
 
 # List of space separated entries, where each entry has the format:
-# username:encryptedpassword:expiredate:inactivenumber:userid:groupid:comment:homedir:shell:group1,group2:flag1,flag2
-IMAGE_ACCOUNTS_USERS =+ "${@gen_accounts_array(d, 'USERS', 'USER', ['password',  'expire', 'inactive', 'uid', 'gid', 'comment', 'home', 'shell', 'groups', 'flags'], ['password', 'comment', 'home', 'shell'])}"
+# username:encryptedpassword:expiredate:inactivenumber:userid:groupid:comment:homedir:shell:group1,group2:skeldir:flag1,flag2
+IMAGE_ACCOUNTS_USERS =+ "${@gen_accounts_array(d, 'USERS', 'USER', ['password',  'expire', 'inactive', 'uid', 'gid', 'comment', 'home', 'shell', 'groups', 'skel', 'flags'], ['password', 'comment', 'home', 'shell', 'skel'])}"
 
 # List of space separated entries, where each entry has the format:
 # groupname:groupid:flag1,flag2
@@ -127,7 +128,7 @@ image_configure_accounts() {
     list='${@" ".join(d.getVar('IMAGE_ACCOUNTS_USERS', True).split())} '
     while true; do
         # Pop first user entry:
-        list_rest="${list#*:*:*:*:*:*:*:*:*:*:* }"
+        list_rest="${list#*:*:*:*:*:*:*:*:*:*:*:* }"
         entry="${list%%${list_rest}}"
         list="${list_rest}"
 
@@ -168,6 +169,9 @@ image_configure_accounts() {
 
         groups="${entry%%:*}"
         entry="${entry#${groups}:}"
+
+        skel="${entry%%:*}"
+        entry="${entry#${skel}:}"
 
         flags="${entry%%:*}"
         entry="${entry#${flags}:}"
@@ -228,6 +232,9 @@ image_configure_accounts() {
                 set -- "$@" --no-create-home
             else
                 if [ "${flags}" != "${flags%*,create-home,*}" ]; then
+                    if [ -n "$skel" ]; then
+                        set -- "$@" --skel "$skel"
+                    fi
                     set -- "$@" --create-home
                 fi
             fi
