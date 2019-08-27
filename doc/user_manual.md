@@ -781,7 +781,7 @@ Cache upstream debian packages to reduce time for further downloads and to be ab
  - Signing of local repo (optional)
 
 By default, the local caching repo is not gpg signed. If you want to share it in a trusted way, you may sign it.
-To do that, install `gpg` in your build environment, import the public and private keys,
+To do that, install `gpg` in your build environment, import the public and private keys (see [1] for details),
 and provide the path to the public key in `conf/local.conf`, e.g.:
 
 ```
@@ -852,3 +852,5 @@ And build the corresponding image target:
 ```
 bitbake multiconfig:qemuarm64-stretch:isar-image-base
 ```
+
+[1] GPG Turorial What is GPG?  https://theprivacyguide.org/tutorials/gpg.html
