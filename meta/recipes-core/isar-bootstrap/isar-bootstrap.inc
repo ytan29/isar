@@ -24,7 +24,7 @@ DISTRO_BOOTSTRAP_KEYFILES = ""
 THIRD_PARTY_APT_KEYFILES = ""
 DEPLOY_ISAR_BOOTSTRAP ?= ""
 DISTRO_BOOTSTRAP_BASE_PACKAGES = "locales"
-DISTRO_BOOTSTRAP_BASE_PACKAGES_append_gnupg = ",gnupg"
+DISTRO_BOOTSTRAP_BASE_PACKAGES_append = ",gnupg"
 DISTRO_BOOTSTRAP_BASE_PACKAGES_append_https-support = "${@https_support(d)}"
 
 inherit deb-dl-dir
@@ -307,14 +307,24 @@ isar_bootstrap() {
             mkdir -p "${ROOTFSDIR}/etc/apt/apt.conf.d"
             install -v -m644 "${WORKDIR}/isar-apt.conf" \
                              "${ROOTFSDIR}/etc/apt/apt.conf.d/50isar.conf"
+            MY_GPGHOME=$(chroot "${ROOTFSDIR}" mktemp -d /tmp/gpghomeXXXXXXXXXX)
+            echo "Created temporary directory ${MY_GPGHOME} for gpg-agent"
+            chroot "${ROOTFSDIR}" gpg-agent --homedir "${MY_GPGHOME}" --daemon
             find ${APT_KEYS_DIR}/ -type f | while read keyfile
             do
                 kfn="$(basename $keyfile)"
                 cp $keyfile "${ROOTFSDIR}/tmp/$kfn"
                 chroot "${ROOTFSDIR}" /usr/bin/apt-key \
-                   --keyring ${THIRD_PARTY_APT_KEYRING} add "/tmp/$kfn"
+                    --keyring ${THIRD_PARTY_APT_KEYRING} \
+                    --homedir ${MY_GPGHOME} add "/tmp/$kfn"
                 rm "${ROOTFSDIR}/tmp/$kfn"
             done
+            sleep 4
+            GPG_AGENT_PID=$(ps -aux | grep "gpg-agent.*${MY_GPGHOME}" | grep -v grep | awk  '{print $2}')
+            echo "Killing gpg-agent with pid $GPG_AGENT_PID"
+            /bin/kill -9 ${GPG_AGENT_PID}
+            sleep 4
+            chroot "${ROOTFSDIR}" /bin/rm -rf "${MY_GPGHOME}"
 
             if [ "${@get_distro_suite(d, True)}" = "stretch" ] && [ "${@get_host_release().split('.')[0]}" -lt "4" ]; then
                 install -v -m644 "${WORKDIR}/isar-apt-fallback.conf" \
