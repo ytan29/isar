@@ -7,10 +7,12 @@ if systemctl is-enabled ssh; then
 fi
 
 echo "Removing keys ..."
-rm -v /etc/ssh/ssh_host_*_key*
+nhkeys=$( find /etc/ssh/ -iname "ssh_host_*key*" -printf '.' | wc -c )
 
-echo "Regenerating keys ..."
-dpkg-reconfigure openssh-server
+if [ "${nhkeys}" -eq "0" ]; then
+    echo "Regenerating keys ..."
+    dpkg-reconfigure openssh-server
+fi
 
 if test -n $SSHD_ENABLED; then
     echo "Reenabling ssh server ..."

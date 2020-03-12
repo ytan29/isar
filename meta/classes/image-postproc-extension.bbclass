@@ -60,8 +60,15 @@ image_postprocess_machine_id() {
     sudo install -m 644 '/dev/null' '${IMAGE_ROOTFS}/etc/machine-id'
 }
 
-ROOTFS_POSTPROCESS_COMMAND =+ "image_postprocess_sshd_key_regen"
+ROOTFS_POSTPROCESS_COMMAND =+ "${@bb.utils.contains('IMAGE_FEATURES', 'delete_ssh_host_keys', 'image_postprocess_delete_ssh_host_keys', '', d)}"
+image_postprocess_delete_ssh_host_keys() {
+    if [ -d ${IMAGE_ROOTFS}/usr/share/doc/sshd-regen-keys ]; then
+        sudo chroot ${IMAGE_ROOTFS} \
+            find /etc/ssh/ -iname "ssh_host_*key*" -exec rm {} \;
+    fi
+}
 
+ROOTFS_POSTPROCESS_COMMAND =+ "image_postprocess_sshd_key_regen"
 image_postprocess_sshd_key_regen() {
     nhkeys=$( find ${IMAGE_ROOTFS}/etc/ssh/ -iname "ssh_host_*key*" -printf '.' | wc -c )
     if [ $nhkeys -ne 0 -a ! -d ${IMAGE_ROOTFS}/usr/share/doc/sshd-regen-keys ]; then
