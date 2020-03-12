@@ -7,7 +7,7 @@ Before=shutdown.target ssh.service
 ConditionPathIsReadWrite=/etc
 
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=yes
 Environment=DEBIAN_FRONTEND=noninteractive
 ExecStart=/usr/sbin/sshd-regen-keys.sh
