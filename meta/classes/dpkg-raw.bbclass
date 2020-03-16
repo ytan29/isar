@@ -29,3 +29,7 @@ override_dh_install:
 	dh_install --sourcedir=${PP}/image
 EOF
 }
+
+# make sure templates are processed before do_install
+inherit template
+addtask do_transform_template after do_unpack before do_install
