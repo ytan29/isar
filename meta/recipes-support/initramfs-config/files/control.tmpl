@@ -1,0 +1,12 @@
+Source: initramfs-config
+Section: misc
+Priority: optional
+Standards-Version: 3.9.6
+Maintainer: Unknown maintainer <unknown@example.com>
+Build-Depends: debhelper (>= 9)
+
+
+Package: initramfs-config
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, initramfs-tools-core, ${KERNEL_PACKAGE}
+Description: Configuration files for a custom initramfs
