@@ -1,0 +1,15 @@
+[Unit]
+Description=Overlay-mount /etc
+DefaultDependencies=no
+Before=local-fs-pre.target
+Requires=ovl.mount
+After=ovl.mount
+
+[Mount]
+What=overlay
+Where=/etc
+Type=overlay
+Options=noauto,x-systemd.automount,lowerdir=/etc,upperdir=/ovl/etc,workdir=/ovl/.atomic
+
+[Install]
+WantedBy=local-fs-pre.target

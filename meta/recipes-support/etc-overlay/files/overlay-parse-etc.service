@@ -1,0 +1,14 @@
+[Unit]
+Description=Reload Configuration from the etc overlay
+DefaultDependencies=no
+Requires=etc.mount
+After=etc.mount
+Before=local-fs-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=!/bin/systemctl daemon-reload
+ExecStart=!/bin/systemctl --no-block isolate multi-user.target
+[Install]
+WantedBy=local-fs-pre.target

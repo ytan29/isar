@@ -902,3 +902,29 @@ And build the corresponding image target:
 ```
 bitbake mc:qemuarm64-buster:isar-image-base
 ```
+## Mount overlay for /etc
+
+### Motivation
+
+If a software update solution updates the complete image, the content of `/etc`
+is also set to new image content. In this case, the user needs to reconfigure
+her system.
+
+### Approach/Solution
+
+A possible solution is to create an additional partition, which superimposes
+`/etc` with an [overlay file-system](https://www.kernel.org/doc/Documentation/filesystems/overlayfs.txt).
+
+### Example
+
+Add the following lines to local.conf:
+```
+IMAGE_TYPE = "wic-img"
+WKS_FILE = "sdimage-efi-overlay"
+IMAGE_INSTALL += "etc-overlay"
+```
+And build the corresponding image target:
+
+```
+bitbake mc:qemuamd64-buster:isar-image-base
+```

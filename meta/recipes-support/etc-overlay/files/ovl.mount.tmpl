@@ -1,0 +1,14 @@
+[Unit]
+Description=Mount /etc overlay backing store
+DefaultDependencies=no
+Before=local-fs-pre.target
+Before=etc.mount
+
+[Mount]
+What=/dev/disk/by-partlabel/etcovl
+Where=/ovl
+Type=ext4
+Options=noatime,nodiratime,data=journal,commit=${FS_COMMIT_INTERVAL},nodelalloc
+
+[Install]
+WantedBy=local-fs-pre.target

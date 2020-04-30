@@ -1,0 +1,4 @@
+# sdimage with etc overlay
+
+include sdimage-efi.wks
+include etc-overlay.inc
