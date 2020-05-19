@@ -22,32 +22,36 @@ BB_ARGS="-v"
 TARGETS_SET="\
             mc:qemuarm-stretch:isar-image-base \
             mc:qemuarm-buster:isar-image-base \
-            mc:qemuarm-bullseye:isar-image-base \
             mc:qemuarm64-stretch:isar-image-base \
             mc:qemui386-stretch:isar-image-base \
             mc:qemui386-buster:isar-image-base \
-            mc:qemui386-bullseye:isar-image-base \
             mc:qemuamd64-stretch:isar-image-base \
             mc:qemuamd64-buster:isar-image-base \
             mc:qemuamd64-buster-tgz:isar-image-base \
-            mc:qemuamd64-bullseye:isar-image-base \
             mc:qemumipsel-stretch:isar-image-base \
             mc:qemumipsel-buster:isar-image-base \
-            mc:qemumipsel-bullseye:isar-image-base \
             mc:nand-ubi-demo-buster:isar-image-ubi \
             mc:rpi-stretch:isar-image-base"
           # qemu-user-static of <= buster too old to build that
           # mc:qemuarm64-buster:isar-image-base
           # mc:qemuarm64-bullseye:isar-image-base
 
+BULLSEYE_TARGETS_SET="\
+            mc:qemuarm-bullseye:isar-image-base \
+            mc:qemui386-bullseye:isar-image-base \
+            mc:qemuamd64-bullseye:isar-image-base \
+            mc:qemumipsel-bullseye:isar-image-base"
+
 CROSS_TARGETS_SET="\
                   mc:qemuarm-stretch:isar-image-base \
                   mc:qemuarm-buster:isar-image-base \
-                  mc:qemuarm-bullseye:isar-image-base \
                   mc:qemuarm64-stretch:isar-image-base \
                   mc:qemuamd64-stretch:isar-image-base \
                   mc:de0-nano-soc-stretch:isar-image-base \
                   mc:rpi-stretch:isar-image-base"
+
+BULLSEYE_CROSS_TARGETS_SET="\
+            mc:qemuarm-bullseye:isar-image-base"
 
 REPRO_TARGETS_SET_SIGNED="\
             mc:de0-nano-soc-stretch:isar-image-base \
@@ -177,6 +181,12 @@ sed -i -e 's/^#BASE_REPO_FEATURES ?= "cache-deb-src"/BASE_REPO_FEATURES ?= "cach
 sed -i -e 's/ISAR_CROSS_COMPILE ?= "0"/ISAR_CROSS_COMPILE ?= "1"/g' conf/local.conf
 bitbake $BB_ARGS $CROSS_TARGETS_SET
 while [ -e bitbake.sock ]; do sleep 1; done
+
+patch -p1 -d .. -i replace_mk_build_deps.patch
+bitbake $BB_ARGS $BULLSEYE_CROSS_TARGETS_SET
+while [ -e bitbake.sock ]; do sleep 1; done
+sudo git reset --hard HEAD
+
 # In addition test SDK creation
 bitbake $BB_ARGS -c do_populate_sdk mc:qemuarm-stretch:isar-image-base
 while [ -e bitbake.sock ]; do sleep 1; done
@@ -186,6 +196,11 @@ if [ -z "$FAST_BUILD" ]; then
     sudo rm -rf tmp
     sed -i -e 's/ISAR_CROSS_COMPILE ?= "1"/ISAR_CROSS_COMPILE ?= "0"/g' conf/local.conf
     bitbake $BB_ARGS $TARGETS_SET
+
+    patch -p1 -d .. -i replace_mk_build_deps.patch
+    bitbake $BB_ARGS $BULLSEYE_TARGETS_SET
+    while [ -e bitbake.sock ]; do sleep 1; done
+    sudo git reset --hard HEAD
 fi
 
 cp -a "${ISARROOT}/meta/classes/dpkg-base.bbclass" "${ISARROOT}/meta/classes/dpkg-base.bbclass.ci-backup"

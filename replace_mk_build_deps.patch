@@ -1,0 +1,67 @@
+From 4da344460aabeb3cf8f5acb8560c68a4015a360f Mon Sep 17 00:00:00 2001
+From: Vlad Serebrennikov <vserebr@ilbers.de>
+Date: Tue, 19 May 2020 13:53:52 +0300
+Subject: [PATCH] Replace mk-build-deps with custom Build-Depends parser
+
+---
+ .../buildchroot/files/deps.sh                 | 34 ++++++++-----------
+ 1 file changed, 14 insertions(+), 20 deletions(-)
+
+diff --git a/meta/recipes-devtools/buildchroot/files/deps.sh b/meta/recipes-devtools/buildchroot/files/deps.sh
+index 93bc9cf..13c8dc7 100644
+--- a/meta/recipes-devtools/buildchroot/files/deps.sh
++++ b/meta/recipes-devtools/buildchroot/files/deps.sh
+@@ -14,18 +14,16 @@ source /isar/common.sh
+ install_cmd="apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends \
+     -y --allow-downgrades $3"
+ 
+-if [ "$3" != "--download-only" ]; then
+-    # Make sure that we have latest isar-apt content.
+-    # Options meaning:
+-    #   Dir::Etc::SourceList - specifies which source to be used
+-    #   Dir::Etc::SourceParts - disables looking for the other sources
+-    #   APT::Get::List-Cleanup - do not erase obsolete packages list for
+-    #                            upstream in '/var/lib/apt/lists'
+-    apt-get update \
+-        -o Dir::Etc::SourceList="sources.list.d/isar-apt.list" \
+-        -o Dir::Etc::SourceParts="-" \
+-        -o APT::Get::List-Cleanup="0"
+-fi
++# Make sure that we have latest isar-apt content.
++# Options meaning:
++#   Dir::Etc::SourceList - specifies which source to be used
++#   Dir::Etc::SourceParts - disables looking for the other sources
++#   APT::Get::List-Cleanup - do not erase obsolete packages list for
++#                            upstream in '/var/lib/apt/lists'
++apt-get update \
++    -o Dir::Etc::SourceList="sources.list.d/isar-apt.list" \
++    -o Dir::Etc::SourceParts="-" \
++    -o APT::Get::List-Cleanup="0"
+ 
+ # Do not set an architecture when building only 'all' (generic) packages.
+ # This can avoid unneeded cross-build issues.
+@@ -33,17 +31,13 @@ if ! grep "^Architecture:" debian/control | grep -qv "all"; then
+     set_arch=""
+ fi
+ 
++DEPS=`perl -ne 'next if /^#/; $p=(s/^Build-Depends:\s*/ / or (/^ / and $p)); s/,|\n|\([^)]+\)|\[[^]]+\]//mg; print if $p' < debian/control`
++
+ # Install all build deps
+ if [ "$3" = "--download-only" ]; then
+-    # this will not return 0 even when it worked
+-    mk-build-deps $set_arch -t "${install_cmd}" -i -r debian/control &> \
+-        mk-build-deps.output || true
+-    cat mk-build-deps.output
+-    # we assume success when we find this
+-    grep "mk-build-deps: Unable to install all build-dep packages" mk-build-deps.output
+-    rm -f mk-build-deps.output
++    ${install_cmd} -f install $DEPS
+ else
+-    mk-build-deps $set_arch -t "${install_cmd}" -i -r debian/control
++    ${install_cmd} -f install $DEPS
+ 
+     # Upgrade any already installed packages in case we are partially rebuilding
+     apt-get upgrade -y --allow-downgrades
+-- 
+2.26.0.windows.1
+
