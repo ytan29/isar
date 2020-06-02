@@ -62,6 +62,7 @@ BBMULTICONFIG = " \
     nanopi-neo-buster \
     rpi-stretch \
     sifive-fu540-sid-ports \
+    pixi-cdl100-buster \
 "
 
 #
