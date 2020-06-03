@@ -10,6 +10,6 @@ DESCRIPTION = "CES X11 demo image"
 
 PV = "1.0"
 
-IMAGE_PREINSTALL += " lightdm lxde libdrm-armada-dev"
+IMAGE_PREINSTALL += " lightdm lxde"
 
 inherit image

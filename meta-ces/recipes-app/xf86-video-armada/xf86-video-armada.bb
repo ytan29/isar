@@ -3,7 +3,7 @@ DESCRIPTION = "Xorg video driver for Marvell Armada DRM and Freescale i.MX"
 LICENSE = "mit"
 LIC_FILES_CHKSUM = "file://${LAYERDIR_core}/COPYING;md5=036ec96f21e8bbe9f7e32ac16cac0889"
 
-DEPENDS += "libdrm-armada"
+DEPENDS += "libdrm-armada-dev"
 
 PV = "unstable-devel+34a7272"
 
