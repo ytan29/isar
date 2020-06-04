@@ -8,6 +8,6 @@ DEPENDS += "libdrm-armada-dev"
 PV = "unstable"
 
 SRC_URI = "git://github.com/ilbers/xf86-video-armada.git;branch=unstable;protocol=http;destsuffix=${P}"
-SRCREV = "82aa321c96569078f0053ba74247ab9205953c40"
+SRCREV = "12ded8d35dc9ff1c4118449fe290f958b6855f2a"
 
 inherit dpkg
