@@ -269,6 +269,37 @@ do_bootstrap[vardeps] += " \
 do_bootstrap[dirs] = "${DEPLOY_DIR_BOOTSTRAP}"
 do_bootstrap[depends] = "base-apt:do_cache isar-apt:do_cache_config"
 
+do_localrepo[lockfiles] = "${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}/isar.lock"
+do_localrepo[depends] = "base-apt:do_cache isar-apt:do_cache_config"
+do_localrepo() {
+    debrepo_args=""
+    if [ "${BASE_DISTRO}" != "debian" ]; then
+        if [ "${BASE_DISTRO}" != "raspbian" ] && [ "${BASE_DISTRO}" != "raspios" ] || [ "${BOOTSTRAP_FOR_HOST}" = "0" ]; then
+            debrepo_args="$debrepo_args --keydir=${WORKDIR}"
+        fi
+    fi
+    if [ "${ISAR_USE_CACHED_BASE_REPO}" = "1" ]; then
+        debrepo_args="$debrepo_args --no-check-gpg"
+    fi
+    if [ "${BOOTSTRAP_FOR_HOST}" = "0" ]; then
+        arch_param="--arch=${DISTRO_ARCH}"
+    else
+        arch_param="--arch=${HOST_ARCH}"
+    fi
+    ${SCRIPTSDIR}/debrepo --init \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        --repodir="${REPO_BASE_DIR}" \
+        --repodbdir="${REPO_BASE_DB_DIR}" \
+        --mirror="${@get_distro_source(d)}" \
+        ${arch_param} \
+        --distro="${BASE_DISTRO}" \
+        --codename="${BASE_DISTRO_CODENAME}" \
+        --components="main,contrib,non-free" \
+        ${debrepo_args} \
+        gnupg locales
+    #deb_dl_dir_export "${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" "${BOOTSTRAP_DISTRO}"
+}
+
 do_bootstrap() {
     if [ "${ISAR_ENABLE_COMPAT_ARCH}" = "1" ]; then
         if [ -z "${COMPAT_DISTRO_ARCH}" ]; then
@@ -291,6 +322,7 @@ do_bootstrap() {
     sudo rm -rf --one-file-system "${ROOTFSDIR}"
     deb_dl_dir_import "${ROOTFSDIR}" "${BOOTSTRAP_DISTRO}"
 
+    debootstrap_args="$debootstrap_args --no-check-gpg"
     sudo -E -s <<'EOSUDO'
         set -e
         if [ "${BOOTSTRAP_FOR_HOST}" = "0" ]; then
@@ -301,7 +333,7 @@ do_bootstrap() {
                        ${@get_distro_components_argument(d)} \
                        "${@get_distro_suite(d)}" \
                        "${ROOTFSDIR}" \
-                       "${@get_distro_source(d)}" \
+                       "file://${REPO_BASE_DIR}/${BASE_DISTRO}" \
                        ${DISTRO_DEBOOTSTRAP_SCRIPT}
 
         # Install apt config
@@ -393,6 +425,7 @@ EOSUDO
 }
 
 addtask bootstrap before do_build after do_generate_keyrings
+addtask localrepo before do_bootstrap after do_generate_keyrings
 
 SSTATETASKS += "do_bootstrap"
 SSTATECREATEFUNCS += "bootstrap_sstate_prepare"
