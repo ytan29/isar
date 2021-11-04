@@ -46,11 +46,11 @@ image_postprocess_configure() {
 }
 
 ROOTFS_POSTPROCESS_COMMAND =+ "image_postprocess_mark"
+ROOTFS_POSTPROCESS_VARDEPS =+ "IMAGE_BUILD_ID"
 
 image_postprocess_mark() {
-    BUILD_ID=$(get_build_id)
     update_etc_os_release \
-        --build-id "${BUILD_ID}" --variant "${DESCRIPTION}" --version "${PV}"
+        --build-id "${IMAGE_BUILD_ID}" --variant "${DESCRIPTION}" --version "${PV}"
 }
 
 ROOTFS_POSTPROCESS_COMMAND =+ "image_postprocess_machine_id"

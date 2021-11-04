@@ -239,7 +239,7 @@ rootfs_export_dpkg_status() {
        '${ROOTFS_DPKGSTATUS_DEPLOY_DIR}'/'${PF}'.dpkg_status
 }
 
-do_rootfs_postprocess[vardeps] = "${ROOTFS_POSTPROCESS_COMMAND}"
+do_rootfs_postprocess[vardeps] = "${ROOTFS_POSTPROCESS_COMMAND} ${ROOTFS_POSTPROCESS_VARDEPS}"
 python do_rootfs_postprocess() {
     # Take care that its correctly mounted:
     bb.build.exec_func('rootfs_do_mounts', d)

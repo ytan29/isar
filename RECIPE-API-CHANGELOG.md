@@ -306,3 +306,16 @@ When using the plugins it is advised to name the partition "/boot" and to exclud
 
 The variable is renamed to get closer to OE/Poky variables naming. The old naming
 will still also work, but with deprecation warning shown.
+
+### ISAR_RELEASE_CMD is executed on every build
+
+The `ISAR_RELEASE_CMD` used to be only executed when changes to the target rootfs where made.
+This lead to outdated data in `/etc/os-release` on incremental builds.
+
+The command is now executed on every build.
+Downstream tasks are invalidated in case the output of the command changes.
+
+When using a custom command it is advised to stick to the following rules:
+
+- no visible side effects (the command is executed multiple times during a build)
+- idempotence (always emit the same output for a single build, i.e. no timestamp)

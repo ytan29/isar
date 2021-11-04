@@ -99,21 +99,23 @@ def get_rootfs_size(d):
 
     return base_size + rootfs_extra * 1024
 
-# here we call a command that should describe your whole build system,
-# this could be "git describe" or something similar.
-# set ISAR_RELEASE_CMD to customize, or override do_mark_rootfs to do something
-# completely different
-get_build_id() {
-	if [ $(echo ${BBLAYERS} | wc -w) -ne 2 ] &&
-	   [ "${ISAR_RELEASE_CMD}" = "${ISAR_RELEASE_CMD_DEFAULT}" ]; then
-		bbwarn "You are using external layers that will not be" \
-		       "considered in the build_id. Consider changing" \
-		       "ISAR_RELEASE_CMD."
-	fi
-	if ! ( ${ISAR_RELEASE_CMD} ) 2>/dev/null; then
-		bbwarn "\"${ISAR_RELEASE_CMD}\" failed, returning empty build_id."
-		echo ""
-	fi
+# the IMAGE_BUILD_ID depends on external conditions injected via
+# ISAR_RELEASE_CMD. By that, we have to compute the value
+# on each invocation
+python() {
+    bblayers = d.getVar('BBLAYERS', True)
+    release_cmd = d.getVar('ISAR_RELEASE_CMD', True)
+    if len(bblayers.split()) != 2:
+        if release_cmd == d.getVar('ISAR_RELEASE_CMD_DEFAULT', True):
+            bb.warn('You are using external layers that will not be '
+                    'considered in the build_id. Consider changing '
+                    'ISAR_RELEASE_CMD.')
+    try:
+        out,err = bb.process.run(release_cmd)
+        d.setVar('IMAGE_BUILD_ID', out.replace('\n', ''))
+    except(bb.process.ExecutionError):
+        bb.warn(f'"{release_cmd}" failed, returning empty build_id.')
+        d.setVar('IMAGE_BUILD_ID', '')
 }
 
 python set_image_size () {
