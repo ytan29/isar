@@ -1,0 +1,21 @@
+From b1cc534d67154b742ae03ca676af9f74c49efcd1 Mon Sep 17 00:00:00 2001
+From: Uladzimir Bely <ubely@ilbers.de>
+Date: Mon, 29 Nov 2021 13:43:01 +0300
+Subject: [PATCH] Add a version number to the binary
+
+Signed-off-by: Uladzimir Bely <ubely@ilbers.de>
+---
+ src/usr/local/bin/example-raw | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/usr/local/bin/example-raw b/src/usr/local/bin/example-raw
+index b6c9541..3e17fe7 100755
+--- a/src/usr/local/bin/example-raw
++++ b/src/usr/local/bin/example-raw
+@@ -1,2 +1,2 @@
+ #!/bin/sh
+-echo Hello ISAR!
++echo Hello ISAR! example-raw_0.4
+-- 
+2.32.0
+
