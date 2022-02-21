@@ -53,12 +53,12 @@ rootfs_do_mounts() {
         fi
 
         # Mount base-apt if 'ISAR_USE_CACHED_BASE_REPO' is set
-        if [ "${@repr(bb.utils.to_boolean(d.getVar('ISAR_USE_CACHED_BASE_REPO')))}" = 'True' ]
-        then
+        #if [ "${@repr(bb.utils.to_boolean(d.getVar('ISAR_USE_CACHED_BASE_REPO')))}" = 'True' ]
+        #then
             mkdir -p '${ROOTFSDIR}/base-apt'
             mountpoint -q '${ROOTFSDIR}/base-apt' || \
                 mount --bind '${REPO_BASE_DIR}' '${ROOTFSDIR}/base-apt'
-        fi
+        #fi
 
 EOSUDO
 }
@@ -96,6 +96,23 @@ Pin: release n=${DEBDISTRONAME}
 Pin-Priority: 1000
 EOF
 EOSUDO
+}
+
+ROOTFS_INSTALL_COMMAND += "rootfs_base_apt_populate"
+rootfs_base_apt_populate[weight] = "600"
+rootfs_base_apt_populate() {
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        ${ROOTFS_PACKAGES}
+}
+
+ROOTFS_INSTALL_COMMAND += "rootfs_base_apt_pkgs_update"
+rootfs_base_apt_pkgs_update[weight] = "5"
+rootfs_base_apt_pkgs_update() {
+    sudo -E chroot '${ROOTFSDIR}' /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
 }
 
 ROOTFS_CONFIGURE_COMMAND += "rootfs_configure_apt"
