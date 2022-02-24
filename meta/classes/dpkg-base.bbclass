@@ -102,8 +102,16 @@ python() {
 }
 
 do_apt_fetch() {
+    ${SCRIPTSDIR}/debrepo \
+        --srcmode \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        ${SRC_APT}
     dpkg_do_mounts
     E="${@ isar_export_proxies(d)}"
+    sudo -E chroot ${BUILDCHROOT_DIR} /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
     sudo -E chroot ${BUILDCHROOT_DIR} /usr/bin/apt-get update \
         -o Dir::Etc::SourceList="sources.list.d/isar-apt.list" \
         -o Dir::Etc::SourceParts="-" \
