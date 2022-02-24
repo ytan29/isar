@@ -13,7 +13,14 @@ GBP_DEPENDS ?= "git-buildpackage pristine-tar"
 GBP_EXTRA_OPTIONS ?= "--git-pristine-tar"
 
 do_install_builddeps_append() {
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        ${GBP_DEPENDS}
     dpkg_do_mounts
+    sudo -E chroot '${BUILDCHROOT_DIR}' /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
     distro="${DISTRO}"
     if [ ${ISAR_CROSS_COMPILE} -eq 1 ]; then
        distro="${HOST_DISTRO}"
