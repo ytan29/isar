@@ -105,6 +105,7 @@ python() {
 }
 
 do_apt_fetch() {
+    E="${@ isar_export_proxies(d)}"
     schroot_create_configs
     for uri in "${SRC_APT}"; do
         schroot -d / -c ${SBUILD_CHROOT} -- \
