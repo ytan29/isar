@@ -91,6 +91,8 @@ class DebRepo(object):
         f = open(self.workdir + "/etc/apt/sources.list", "w")
         f.write("deb [arch=" + self.arch + "] " + self.mirror + " " + self.codename + " " + self.components + "\n")
         f.write("deb-src [arch=" + self.arch + "] " + self.mirror + " " + self.codename + " " + self.components + "\n")
+        f.write("deb [trusted=yes] file://" + self.workdir + "/../../deploy/isar-apt/" + self.distro + "-" + self.codename + "-" + self.arch + "/apt/" + self.distro + "-" + self.codename + " isar main\n")
+
         f.flush
         f.close
 
