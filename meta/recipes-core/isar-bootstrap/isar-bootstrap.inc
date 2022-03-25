@@ -341,20 +341,16 @@ do_bootstrap() {
         install -v -m644 "${APTPREFS}" \
                          "${ROOTFSDIR}/etc/apt/preferences.d/bootstrap"
         mkdir -p "${ROOTFSDIR}/etc/apt/sources.list.d"
-        if [ "${ISAR_USE_CACHED_BASE_REPO}" = "1" ]; then
-            line="file:///base-apt/${BASE_DISTRO} ${BASE_DISTRO_CODENAME} main"
-            if [ -z "${BASE_REPO_KEY}" ]; then
-                line="[trusted=yes] ${line}"
-            fi
-            echo "deb ${line}" >  "${ROOTFSDIR}/etc/apt/sources.list.d/base-apt.list"
-            echo "deb-src ${line}" >>  "${ROOTFSDIR}/etc/apt/sources.list.d/base-apt.list"
 
-            mkdir -p ${ROOTFSDIR}/base-apt
-            mount --bind ${REPO_BASE_DIR} ${ROOTFSDIR}/base-apt
-        else
-            install -v -m644 "${APTSRCS}" \
-                             "${ROOTFSDIR}/etc/apt/sources.list.d/bootstrap.list"
-        fi
+        line="file:///base-apt/${BASE_DISTRO} ${BASE_DISTRO_CODENAME} main"
+        [ -z "${BASE_REPO_KEY}" ] && line="[trusted=yes] ${line}"
+
+        echo "deb ${line}" >  "${ROOTFSDIR}/etc/apt/sources.list.d/base-apt.list"
+        echo "deb-src ${line}" >>  "${ROOTFSDIR}/etc/apt/sources.list.d/base-apt.list"
+
+        mkdir -p ${ROOTFSDIR}/base-apt
+        mount --bind ${REPO_BASE_DIR} ${ROOTFSDIR}/base-apt
+
         install -v -m644 "${APTSRCS_INIT}" "${ROOTFSDIR}/etc/apt/sources-list"
         rm -f "${ROOTFSDIR}/etc/apt/sources.list"
         rm -rf "${ROOTFSDIR}/var/lib/apt/lists/"*

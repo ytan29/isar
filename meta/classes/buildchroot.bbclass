@@ -50,13 +50,9 @@ buildchroot_do_mounts() {
             mount --rbind /sys '${BUILDCHROOT_DIR}/sys'
         mount --make-rslave '${BUILDCHROOT_DIR}/sys'
 
-        # Mount base-apt if 'ISAR_USE_CACHED_BASE_REPO' is set
-        if [ "${@repr(bb.utils.to_boolean(d.getVar('ISAR_USE_CACHED_BASE_REPO')))}" = 'True' ]
-        then
-            mkdir -p '${BUILDCHROOT_DIR}/base-apt'
-            mountpoint -q '${BUILDCHROOT_DIR}/base-apt' || \
-                mount --bind '${REPO_BASE_DIR}' '${BUILDCHROOT_DIR}/base-apt'
-        fi
+        mkdir -p '${BUILDCHROOT_DIR}/base-apt'
+        mountpoint -q '${BUILDCHROOT_DIR}/base-apt' || \
+            mount --bind '${REPO_BASE_DIR}' '${BUILDCHROOT_DIR}/base-apt'
 
         # Refresh or remove /etc/resolv.conf at this chance
         if [ "${@repr(bb.utils.to_boolean(d.getVar('BB_NO_NETWORK')))}" = 'True' ]
