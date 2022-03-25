@@ -22,10 +22,17 @@ do_install_imager_deps() {
         exit
     fi
 
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        ${IMAGER_INSTALL}
     buildchroot_do_mounts
 
     E="${@ isar_export_proxies(d)}"
     deb_dl_dir_import ${BUILDCHROOT_DIR} ${DISTRO}
+    sudo -E chroot ${BUILDCHROOT_DIR} /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
     sudo -E chroot ${BUILDCHROOT_DIR} sh -c ' \
         apt-get update \
             -o Dir::Etc::SourceList="sources.list.d/isar-apt.list" \

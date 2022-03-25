@@ -28,6 +28,13 @@ def get_nopurge(d):
 ROOTFS_INSTALL_COMMAND_BEFORE_EXPORT += "image_install_localepurge_download"
 image_install_localepurge_download[weight] = "40"
 image_install_localepurge_download() {
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        localepurge
+    sudo -E chroot '${ROOTFSDIR}' /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
     sudo -E chroot '${ROOTFSDIR}' \
         /usr/bin/apt-get ${ROOTFS_APT_ARGS} --download-only localepurge
 }

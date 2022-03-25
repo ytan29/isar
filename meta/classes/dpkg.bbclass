@@ -7,7 +7,14 @@ PACKAGE_ARCH ?= "${DISTRO_ARCH}"
 
 # Install build dependencies for package
 do_install_builddeps() {
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        --controlfile="${WORKDIR}/${PPS}/debian/control"
     dpkg_do_mounts
+    sudo -E chroot '${BUILDCHROOT_DIR}' /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
     E="${@ isar_export_proxies(d)}"
     export DEB_BUILD_OPTIONS="${@ isar_deb_build_options(d)}"
     export DEB_BUILD_PROFILES="${@ isar_deb_build_profiles(d)}"

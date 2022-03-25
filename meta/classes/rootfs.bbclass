@@ -94,6 +94,23 @@ EOF
 EOSUDO
 }
 
+ROOTFS_INSTALL_COMMAND += "rootfs_base_apt_populate"
+rootfs_base_apt_populate[weight] = "600"
+rootfs_base_apt_populate() {
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        ${ROOTFS_PACKAGES}
+}
+
+ROOTFS_INSTALL_COMMAND += "rootfs_base_apt_pkgs_update"
+rootfs_base_apt_pkgs_update[weight] = "5"
+rootfs_base_apt_pkgs_update() {
+    sudo -E chroot '${ROOTFSDIR}' /usr/bin/apt-get update \
+        -o Dir::Etc::SourceList="sources.list.d/base-apt.list" \
+        -o Dir::Etc::SourceParts="-" \
+        -o APT::Get::List-Cleanup="0"
+}
+
 ROOTFS_CONFIGURE_COMMAND += "rootfs_configure_apt"
 rootfs_configure_apt[weight] = "2"
 rootfs_configure_apt() {
@@ -139,6 +156,9 @@ ROOTFS_INSTALL_COMMAND += "rootfs_install_pkgs_download"
 rootfs_install_pkgs_download[weight] = "600"
 rootfs_install_pkgs_download[isar-apt-lock] = "release-after"
 rootfs_install_pkgs_download() {
+    ${SCRIPTSDIR}/debrepo \
+        --workdir="${TMPDIR}/debrepo/${BASE_DISTRO}-${BASE_DISTRO_CODENAME}" \
+        ${ROOTFS_PACKAGES}
     sudo -E chroot '${ROOTFSDIR}' \
         /usr/bin/apt-get ${ROOTFS_APT_ARGS} --download-only ${ROOTFS_PACKAGES}
 }
