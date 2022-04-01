@@ -296,9 +296,10 @@ do_bootstrap() {
         if [ "${BOOTSTRAP_FOR_HOST}" = "0" ]; then
             arch_param="--arch=${DISTRO_ARCH}"
         fi
-        ${DEBOOTSTRAP} $debootstrap_args \
+        # ${DEBOOTSTRAP} $debootstrap_args \
+        ${DEBOOTSTRAP} --verbose --variant=minbase --include=locales \
                        $arch_param \
-                       ${@get_distro_components_argument(d)} \
+                       "${@get_distro_components_argument(d)}" \
                        "${@get_distro_suite(d)}" \
                        "${ROOTFSDIR}" \
                        "${@get_distro_source(d)}" \
